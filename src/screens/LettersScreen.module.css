@@ -1,0 +1,43 @@
+.container { min-height:100vh; background:var(--dark); display:flex; flex-direction:column; }
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 20px 16px; border-bottom:1px solid var(--border);
+  position:sticky; top:0; background:var(--dark); z-index:10;
+}
+.backBtn { width:40px;height:40px;background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer; }
+.title { font-family:'Fredoka One',cursive; font-size:22px; color:var(--pink); }
+.tabs { display:flex; border-bottom:1px solid var(--border); }
+.tab {
+  flex:1; padding:14px; background:transparent; border:none;
+  border-bottom:2px solid transparent; color:var(--muted);
+  font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.18s;
+}
+.tabActive { color:var(--pink); border-bottom-color:var(--pink); }
+.scroll { padding:16px; overflow-y:auto; flex:1; }
+.card {
+  background:var(--card); border-radius:18px;
+  border:1px solid var(--border); padding:16px; margin-bottom:12px;
+}
+.cardNew { border-color:rgba(255,110,199,0.35); background:rgba(255,110,199,0.04); }
+.newBadge {
+  display:inline-block; background:var(--pink);
+  border-radius:999px; padding:3px 8px;
+  font-size:9px; font-weight:800; color:#000; letter-spacing:.5px; margin-bottom:8px;
+}
+.cardTop { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.from { font-size:13px; font-weight:700; }
+.time { font-size:11px; color:var(--muted); }
+.replyingTo { font-size:11px; color:var(--muted); margin-bottom:8px; font-style:italic; }
+.preview { font-size:14px; color:rgba(240,240,255,0.8); line-height:1.5; margin-bottom:12px; }
+.replyBtn {
+  width:100%; padding:10px; border-radius:10px;
+  background:rgba(255,110,199,0.1);
+  border:1px solid rgba(255,110,199,0.25);
+  color:var(--pink); font-family:'Nunito',sans-serif;
+  font-size:13px; font-weight:700; cursor:pointer; transition:all 0.18s;
+}
+.replyBtn:hover { background:rgba(255,110,199,0.18); }
+.empty { display:flex; flex-direction:column; align-items:center; padding:80px 20px; text-align:center; }
+.emptyIcon { font-size:48px; margin-bottom:16px; }
+.emptyTitle { font-family:'Fredoka One',cursive; font-size:22px; margin-bottom:8px; }
+.emptySub { font-size:14px; color:var(--muted); }

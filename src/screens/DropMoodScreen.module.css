@@ -1,0 +1,145 @@
+.container {
+  height:100vh; background:#0A0A0F;
+  display:flex; flex-direction:column; overflow:hidden; position:relative;
+}
+
+/* BG blobs */
+.blob1 {
+  position:fixed; width:300px; height:300px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,110,199,0.18),transparent 70%);
+  top:-100px; right:-80px; pointer-events:none; z-index:0;
+  animation:floatBlob 7s infinite ease-in-out;
+}
+.blob2 {
+  position:fixed; width:250px; height:250px; border-radius:50%;
+  background:radial-gradient(circle,rgba(200,255,0,0.13),transparent 70%);
+  bottom:100px; left:-80px; pointer-events:none; z-index:0;
+  animation:floatBlob 9s infinite ease-in-out reverse;
+}
+.blob3 {
+  position:fixed; width:180px; height:180px; border-radius:50%;
+  background:radial-gradient(circle,rgba(0,229,255,0.12),transparent 70%);
+  top:50%; left:50%; pointer-events:none; z-index:0;
+  animation:floatBlob 6s infinite ease-in-out 2s;
+}
+@keyframes floatBlob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+
+.header {
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 20px 14px;
+  background:rgba(10,10,15,0.85); backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.backBtn { width:40px;height:40px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:rgba(240,240,255,0.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+.title { font-family:'Fredoka One',cursive; font-size:22px; color:#FF6EC7; }
+
+.scroll { position:relative; z-index:1; padding:20px 16px; overflow-y:auto; flex:1; }
+.sub { font-size:12px; color:rgba(240,240,255,0.4); margin-bottom:20px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+
+/* Selected preview */
+.selectedPreview {
+  display:flex; align-items:center; gap:14px;
+  border:2px solid; border-radius:18px; padding:14px 18px;
+  margin-bottom:20px; transition:all 0.3s;
+}
+.selectedEmoji { font-size:36px; }
+.selectedLabel { font-family:'Fredoka One',cursive; font-size:18px; }
+.selectedSub { font-size:11px; color:rgba(240,240,255,0.4); margin-top:2px; }
+
+/* MOOD GRID */
+.grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:24px; }
+.moodOpt {
+  aspect-ratio:1; border-radius:18px;
+  background:rgba(255,255,255,0.06);
+  border:2px solid rgba(255,255,255,0.08);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  cursor:pointer; transition:all 0.2s;
+}
+.moodOpt:hover { background:rgba(255,255,255,0.1); transform:scale(1.05); }
+.moodOptSelected { transform:scale(1.08) !important; }
+.moodEmoji { font-size:26px; }
+.moodLabel { font-size:9px; font-weight:800; color:rgba(240,240,255,0.4); text-transform:uppercase; letter-spacing:0.3px; }
+.moodLabelSelected {}
+
+/* CAPTION */
+.captionWrap { margin-bottom:16px; }
+.captionLabel {
+  font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px;
+  color:rgba(240,240,255,0.45); margin-bottom:8px;
+}
+.captionLabel span { text-transform:none; font-weight:400; letter-spacing:0; }
+.captionInput {
+  width:100%; background:rgba(255,255,255,0.06);
+  border:2px solid rgba(255,255,255,0.08); border-radius:18px;
+  padding:14px 16px; color:#F0F0FF;
+  font-family:'Nunito',sans-serif; font-size:14px;
+  resize:none; min-height:100px; outline:none; margin-bottom:6px;
+  transition:border-color 0.2s;
+}
+.captionInput:focus { border-color:rgba(255,110,199,0.5); }
+.captionInput::placeholder { color:rgba(240,240,255,0.25); }
+.charCount { font-size:11px; color:rgba(240,240,255,0.3); text-align:right; }
+
+/* LOCATION CARD */
+.locationCard {
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,110,199,0.08); border:2px solid rgba(255,110,199,0.2);
+  border-radius:16px; padding:14px 16px; margin-bottom:24px;
+}
+.locationIcon { font-size:24px; }
+.locationInfo { flex:1; }
+.locationLabel { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:rgba(240,240,255,0.4); }
+.locationValue { font-size:15px; font-weight:700; color:#F0F0FF; margin-top:2px; }
+.locationBadge {
+  background:rgba(0,220,80,0.15); border:1px solid rgba(0,220,80,0.3);
+  border-radius:999px; padding:4px 10px; font-size:10px; font-weight:800;
+  color:#00dd55; text-transform:uppercase; letter-spacing:0.5px;
+  animation:blink 2s infinite;
+}
+
+/* DROP BUTTON */
+.dropBtn {
+  width:100%; padding:18px; border-radius:999px; border:none;
+  background:linear-gradient(135deg,#FF6EC7,#c0399a);
+  color:#fff; font-family:'Fredoka One',cursive; font-size:22px;
+  cursor:pointer; transition:all 0.25s; margin-bottom:16px;
+  letter-spacing:0.3px;
+}
+.dropBtn:not(.dropBtnDisabled):hover { transform:scale(1.03); }
+.dropBtnDisabled {
+  background:rgba(255,255,255,0.08); color:rgba(240,240,255,0.3);
+  cursor:not-allowed; box-shadow:none !important;
+}
+
+.disclaimer { font-size:12px; color:rgba(240,240,255,0.3); text-align:center; line-height:1.5; }
+
+/* DROPPED STATE */
+.droppedContainer {
+  position:fixed; inset:0; background:#0A0A0F;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:32px; overflow:hidden;
+}
+.droppedBlob1 {
+  position:absolute; width:400px; height:400px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,110,199,0.25),transparent 70%);
+  top:-100px; left:-100px; animation:floatBlob 5s infinite;
+}
+.droppedBlob2 {
+  position:absolute; width:350px; height:350px; border-radius:50%;
+  background:radial-gradient(circle,rgba(200,255,0,0.2),transparent 70%);
+  bottom:-80px; right:-80px; animation:floatBlob 7s infinite reverse;
+}
+.droppedEmoji {
+  font-size:80px; margin-bottom:20px; position:relative; z-index:1;
+  animation:bounceIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bounceIn { 0%{transform:scale(0)} 100%{transform:scale(1)} }
+.droppedTitle {
+  font-family:'Fredoka One',cursive; font-size:32px; color:#FF6EC7;
+  margin-bottom:12px; position:relative; z-index:1;
+}
+.droppedSub {
+  font-size:15px; color:rgba(240,240,255,0.55); line-height:1.6;
+  max-width:280px; position:relative; z-index:1;
+}

@@ -1,0 +1,32 @@
+.container { min-height:100vh; background:var(--dark); display:flex; flex-direction:column; }
+.header { padding:20px 20px 14px; }
+.title { font-family:'Fredoka One',cursive; font-size:24px; color:#FF6EC7; letter-spacing:-1px; }
+.title span { color:#C8FF00; }
+.sub { font-size:11px; color:rgba(240,240,255,0.4); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-top:1px; }
+.scroll { flex:1; overflow-y:auto; padding:0 16px; }
+
+.avatarSection { display:flex; flex-direction:column; align-items:center; padding:24px 0 20px; }
+.avatar { width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#FF6EC7,#00E5FF);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:12px; box-shadow:0 0 32px rgba(255,110,199,0.3); }
+.anonLabel { font-family:'Fredoka One',cursive; font-size:22px; color:var(--text); }
+.anonSub { font-size:12px; color:rgba(240,240,255,0.4); margin-top:4px; }
+
+.statsRow { display:flex; gap:10px; margin-bottom:24px; }
+.statCard { flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center; }
+.statNum { font-family:'Fredoka One',cursive;font-size:28px;color:#00E5FF; }
+.statLabel { font-size:10px;color:rgba(240,240,255,0.4);margin-top:3px;font-weight:700; }
+
+.sectionTitle { font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(240,240,255,0.4);margin-bottom:12px; }
+.dropCard { background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px; }
+.dropTop { display:flex;gap:12px;margin-bottom:10px; }
+.dropEmoji { font-size:32px; }
+.dropMeta { flex:1; }
+.dropCaption { font-size:14px;font-weight:600;line-height:1.4; }
+.dropTime { font-size:11px;color:rgba(240,240,255,0.4);margin-top:3px; }
+.dropStats { display:flex;gap:14px;font-size:12px;color:rgba(240,240,255,0.45);font-weight:600; }
+
+.settingsCard { background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:16px; }
+.settingRow { display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border); }
+.settingRow:last-child { border-bottom:none; }
+.settingIcon { font-size:20px;width:28px; }
+.settingLabel { flex:1;font-size:14px;font-weight:600; }
+.settingValue { font-size:13px;color:rgba(240,240,255,0.4); }

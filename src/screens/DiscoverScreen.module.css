@@ -1,0 +1,86 @@
+.container { min-height: 100vh; background: var(--dark); display: flex; flex-direction: column; overflow: hidden; }
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 20px 14px;
+  background: linear-gradient(to bottom, rgba(10,10,15,1) 80%, transparent);
+  position: sticky; top: 0; z-index: 10;
+}
+.title { font-family: 'Fredoka One', cursive; font-size: 24px; color: #FF6EC7; letter-spacing: -1px; }
+.title span { color: #C8FF00; }
+.sub { font-size: 11px; color: rgba(240,240,255,0.4); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 1px; }
+
+.livePill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(200,255,0,0.08); border: 1px solid rgba(200,255,0,0.2);
+  border-radius: 999px; padding: 6px 14px;
+  font-size: 12px; font-weight: 700; color: #C8FF00;
+}
+.liveDot { width: 6px; height: 6px; border-radius: 50%; background: #C8FF00; animation: blink 1.5s infinite; flex-shrink: 0; }
+
+.scroll { flex: 1; overflow-y: auto; padding: 0 16px; }
+
+/* WORLD MOOD CARD */
+.worldMoodCard {
+  background: linear-gradient(135deg, rgba(255,110,199,0.1), rgba(0,229,255,0.05));
+  border: 1px solid rgba(255,110,199,0.2);
+  border-radius: 20px; padding: 20px; margin-bottom: 16px;
+}
+.worldMoodLabel { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(240,240,255,0.5); margin-bottom: 14px; }
+.worldMoodMain { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.worldMoodEmoji { font-size: 48px; }
+.worldMoodName { font-family: 'Fredoka One', cursive; font-size: 28px; color: #F0F0FF; }
+.worldMoodSub { font-size: 12px; color: rgba(240,240,255,0.5); margin-top: 2px; }
+
+.moodBars { display: flex; flex-direction: column; gap: 10px; }
+.moodBarRow { display: flex; align-items: center; gap: 10px; }
+.moodBarEmoji { font-size: 16px; width: 22px; }
+.moodBarTrack { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+.moodBarFill { height: 100%; border-radius: 999px; transition: width 1s ease; }
+.moodBarPct { font-size: 11px; font-weight: 700; color: rgba(240,240,255,0.5); width: 30px; text-align: right; }
+
+/* DIARY */
+.diaryCard {
+  background: var(--card); border: 1px solid rgba(255,110,199,0.15);
+  border-radius: 20px; padding: 20px; margin-bottom: 16px;
+}
+.diaryHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.diaryLabel { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #FF6EC7; }
+.diaryDate { font-size: 11px; color: rgba(240,240,255,0.4); }
+.diaryText { font-size: 14px; color: rgba(240,240,255,0.82); line-height: 1.75; font-style: italic; }
+.cursor { color: #FF6EC7; animation: blink 0.8s infinite; }
+
+.aiLoading { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.aiDot { width: 8px; height: 8px; border-radius: 50%; background: #FF6EC7; animation: bounce 1.2s infinite; }
+.aiDot:nth-child(2) { animation-delay: 0.2s; }
+.aiDot:nth-child(3) { animation-delay: 0.4s; }
+.aiLoadingText { font-size: 13px; color: rgba(240,240,255,0.5); font-style: italic; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.8);opacity:0.5} 40%{transform:scale(1.2);opacity:1} }
+
+/* SECTIONS */
+.sectionTitle { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(240,240,255,0.45); margin-bottom: 12px; margin-top: 4px; }
+
+/* CITY SUMMARIES */
+.citySummaries { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.citySummaryCard { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+.citySummaryHeader { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cityFlag { font-size: 20px; }
+.cityName { font-size: 14px; font-weight: 700; }
+.citySummaryText { font-size: 13px; color: rgba(240,240,255,0.7); line-height: 1.55; }
+
+/* LEADERBOARD */
+.leaderboard { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
+.leaderRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.leaderRow:last-child { border-bottom: none; }
+.leaderRow:hover { background: rgba(255,255,255,0.03); }
+.leaderRank { font-size: 16px; width: 28px; text-align: center; flex-shrink: 0; font-weight: 700; }
+.leaderFlag { font-size: 20px; flex-shrink: 0; }
+.leaderInfo { flex: 1; }
+.leaderCity { font-size: 14px; font-weight: 700; }
+.leaderMoodLabel { font-size: 11px; font-weight: 700; margin-top: 1px; }
+.leaderMoodEmoji { font-size: 22px; }
+.leaderCount { font-size: 11px; color: rgba(240,240,255,0.4); text-align: right; flex-shrink: 0; }

@@ -1,0 +1,2 @@
+/* sidebar already handles nav — hide floating nav */
+.nav { display: none; }

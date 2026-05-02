@@ -8,11 +8,15 @@
 # 1. Install deps
 npm install
 
-# 2. Run locally
+# 2. Configure Supabase (REQUIRED - 100% FREE!)
+# See SUPABASE_SETUP.md for detailed instructions
+# Edit src/supabase.js with your Supabase credentials
+
+# 3. Run locally
 npm run dev
 # → opens at http://localhost:5173
 
-# 3. Build for production
+# 4. Build for production
 npm run build
 ```
 
@@ -36,16 +40,26 @@ vercel
 | Route | Screen |
 |-------|--------|
 | `/` | Live mood map — tap dots, filter by mood |
-| `/drop` | Drop your mood on the map |
+| `/drop` | Drop your mood on the map (deprecated - now in sidebar) |
 | `/write` | Write anonymous letter to a mood dot |
 | `/letters` | Inbox — letters received + reply |
 
-## Next: Firebase (real-time data)
-```bash
-npm install firebase
-```
-- Replace mock data in `src/data/moods.js` with Firestore reads
-- Add anonymous auth with Firebase Auth
-- Add push notifications with Firebase Cloud Messaging
+## Tech Stack
+
+- **Frontend**: React + Vite
+- **Map**: Leaflet + OpenStreetMap
+- **Database**: Supabase (PostgreSQL + Real-time)
+- **Auth**: Supabase Anonymous Auth
+- **Hosting**: Vercel
+
+## Features
+
+✅ Real-time global mood map
+✅ Anonymous users (no signup)
+✅ Moods auto-expire after 6 hours
+✅ Send anonymous letters
+✅ Reply to moods
+✅ Filter by mood type
+✅ Location-based drops
 
 Built with 🤫 by Dhuriii

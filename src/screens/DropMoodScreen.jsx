@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { supabase, ensureAuth } from '../supabase'
 import { MOOD_COLORS } from '../data/moods'
 import styles from './DropMoodScreen.module.css'
 
@@ -20,24 +21,47 @@ export default function DropMoodScreen() {
   const [caption, setCaption] = useState('')
   const [dropped, setDropped] = useState(false)
 
-  const handleDrop = () => {
+  const handleDrop = async () => {
     if (!selected) return
-    const existing = JSON.parse(localStorage.getItem('hushd_drops') || '[]')
-    const newDrop = {
-      id: Date.now().toString(),
-      lat: userLocation?.lat,
-      lng: userLocation?.lng,
-      city: userLocation?.city || 'Unknown',
-      emoji: selected.emoji,
-      mood: selected.mood,
-      caption: caption || `feeling ${selected.label.toLowerCase()}`,
-      time: 'just now',
-      relates: 0,
-      letters: 0,
+    try {
+      console.log('🔄 Starting mood drop...')
+      const user = await ensureAuth()
+      console.log('✅ User authenticated:', user.id)
+      
+      const expiresAt = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString()
+      
+      const moodData = {
+        user_id: user.id,
+        lat: userLocation?.lat,
+        lng: userLocation?.lng,
+        city: userLocation?.city || 'Unknown',
+        emoji: selected.emoji,
+        mood: selected.mood,
+        caption: caption || `feeling ${selected.label.toLowerCase()}`,
+        expires_at: expiresAt,
+        relates: 0,
+        letters: 0,
+      }
+      
+      console.log('📤 Sending mood data:', moodData)
+      
+      const { data, error } = await supabase
+        .from('moods')
+        .insert(moodData)
+        .select()
+      
+      if (error) {
+        console.error('❌ Supabase error:', error)
+        throw error
+      }
+      
+      console.log('✅ Mood dropped successfully!', data)
+      setDropped(true)
+      setTimeout(() => navigate('/'), 2200)
+    } catch (error) {
+      console.error('❌ Error dropping mood:', error)
+      alert(`Failed to drop mood:\n\n${error.message}\n\nCheck console for details.`)
     }
-    localStorage.setItem('hushd_drops', JSON.stringify([newDrop, ...existing]))
-    setDropped(true)
-    setTimeout(() => navigate('/'), 2200)
   }
 
   if (dropped) return (

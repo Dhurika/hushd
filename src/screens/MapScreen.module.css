@@ -15,9 +15,58 @@
     width: 100%;
     height: auto;
     bottom: auto;
-    max-height: 60vh;
+    max-height: 50vh;
     overflow-y: auto;
     border-radius: 0 0 24px 24px;
+    padding: 8px 16px 80px;
+  }
+  .logo {
+    width: 120px;
+    align-self: center;
+    margin-left: 0;
+  }
+  .tellCard {
+    min-height: 280px;
+  }
+  .tellTitle {
+    font-size: 16px;
+  }
+  .moodChip {
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
+  }
+  .zoomControls {
+    bottom: 100px;
+    right: 12px;
+  }
+  .zoomBtn {
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+  }
+  .ownMoodTooltip {
+    padding: 24px 28px;
+    max-width: 90%;
+  }
+  .tooltipEmoji {
+    font-size: 44px;
+  }
+  .tooltipMessage {
+    font-size: 19px;
+    line-height: 1.6;
+  }
+  .tooltipMessage::before,
+  .tooltipMessage::after {
+    font-size: 36px;
+  }
+  .tooltipActions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tooltipActionBtn {
+    padding: 14px;
+    font-size: 15px;
   }
 }
 
@@ -561,3 +610,268 @@
 
 
 
+
+
+/* ── LIVE USER COUNT ── */
+.liveCount {
+  position:fixed; bottom:30px; right:20px; z-index:103;
+  display:flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg, #AAFF00 0%, #C8FF00 100%);
+  border:4px solid #1a1a2e; border-radius:999px;
+  padding:8px 18px; box-shadow:5px 5px 0 #1a1a2e;
+  animation:pulse 2s ease-in-out infinite;
+}
+.liveCountDot {
+  width:10px; height:10px; border-radius:50%;
+  background:#1a1a2e;
+  animation:blink 1.5s ease-in-out infinite;
+}
+.liveCountText {
+  font-family:'Fredoka One',cursive; font-size:14px;
+  color:#1a1a2e; font-weight:700;
+}
+
+@keyframes blink {
+  0%, 100% { opacity:1; }
+  50% { opacity:0.3; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform:scale(1); }
+  50% { transform:scale(1.05); }
+}
+
+@media (max-width: 768px) {
+  .liveCount {
+    bottom:20px; right:10px;
+  }
+}
+
+
+/* ── OWN MOOD DISPLAY ── */
+.ownMoodBadge {
+  display:inline-block; margin-top:8px; padding:4px 12px;
+  background:#FFE500; border:2px solid #1a1a2e; border-radius:999px;
+  font-size:11px; font-weight:800; color:#1a1a2e;
+}
+.ownMoodMessage {
+  text-align:center; padding:32px 20px;
+}
+.ownMoodIcon {
+  font-size:48px; margin-bottom:16px;
+}
+.ownMoodTitle {
+  font-family:'Fredoka One',cursive; font-size:18px;
+  color:#F0F0FF; margin-bottom:12px;
+}
+.ownMoodText {
+  font-size:14px; line-height:1.6; color:rgba(240,240,255,0.7);
+  margin-bottom:20px;
+}
+
+.ownMoodCaption {
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px; padding:16px; margin:20px 0;
+  text-align:left;
+}
+.ownMoodCaptionLabel {
+  font-size:11px; color:rgba(240,240,255,0.5);
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;
+  font-weight:700;
+}
+.ownMoodCaptionText {
+  font-size:15px; line-height:1.5; color:#F0F0FF;
+  font-style:italic;
+}
+
+
+/* ── OWN MOOD TOOLTIP ── */
+.ownMoodTooltip {
+  position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-1deg);
+  z-index:500; background:#FFF9E6; border:3px solid #1a1a2e;
+  border-radius:12px; padding:32px 40px; max-width:450px; width:90%;
+  box-shadow:4px 4px 0 #1a1a2e, 8px 8px 20px rgba(0,0,0,0.15);
+  animation:popIn 0.3s ease;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 30px,
+      rgba(26, 26, 46, 0.05) 30px,
+      rgba(26, 26, 46, 0.05) 31px
+    );
+}
+.tooltipClose {
+  position:absolute; top:12px; right:12px;
+  background:transparent; border:none; font-size:20px;
+  color:#1a1a2e; cursor:pointer; width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%; transition:all 0.2s;
+}
+.tooltipClose:hover {
+  background:rgba(0,0,0,0.05); transform:rotate(90deg);
+}
+.tooltipEmoji {
+  font-size:56px; text-align:center; margin-bottom:20px;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+}
+.tooltipMessage {
+  font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+  font-size:24px; line-height:1.8; color:#1a1a2e;
+  font-weight:400; text-align:center; font-style:italic;
+  letter-spacing:0.5px;
+  position:relative;
+  padding:0 10px;
+}
+.tooltipMessage::before {
+  content: '“';
+  position:absolute; left:-10px; top:-10px;
+  font-size:48px; color:#FF6EC7; opacity:0.3;
+  font-family: Georgia, serif;
+}
+.tooltipMessage::after {
+  content: '”';
+  position:absolute; right:-10px; bottom:-20px;
+  font-size:48px; color:#FF6EC7; opacity:0.3;
+  font-family: Georgia, serif;
+}
+
+@media (max-width: 768px) {
+  .ownMoodTooltip {
+    padding:24px 32px;
+    max-width:85%;
+  }
+  .tooltipEmoji {
+    font-size:44px;
+  }
+  .tooltipMessage {
+    font-size:20px;
+  }
+}
+
+.tooltipThreads {
+  margin-top:24px; padding-top:20px;
+  border-top:2px dashed rgba(26,26,46,0.2);
+}
+.tooltipThreadTitle {
+  font-family:'Nunito',sans-serif; font-size:13px;
+  color:#666; text-align:center; margin-bottom:12px;
+  font-weight:700; text-transform:uppercase; letter-spacing:1px;
+}
+.tooltipThreadList {
+  display:flex; flex-direction:column; gap:12px;
+  max-height:200px; overflow-y:auto;
+}
+.tooltipThreadItem {
+  background:rgba(255,110,199,0.08); border:2px solid rgba(26,26,46,0.1);
+  border-radius:12px; padding:12px 16px;
+  transition:all 0.2s; position:relative;
+  display:flex; gap:12px; align-items:flex-start;
+}
+.tooltipThreadItem:hover {
+  background:rgba(255,110,199,0.15);
+  transform:translateX(4px);
+}
+.tooltipThreadEmoji {
+  font-size:28px; flex-shrink:0;
+}
+.tooltipThreadContent {
+  flex:1;
+}
+.tooltipThreadText {
+  font-family:'Nunito',sans-serif; font-size:14px;
+  line-height:1.5; color:#1a1a2e; margin-bottom:4px;
+}
+.tooltipThreadTime {
+  font-size:11px; color:#999; font-weight:600; margin-bottom:8px;
+}
+.tooltipThreadReply {
+  background:#FF6EC7; border:2px solid #1a1a2e;
+  border-radius:8px; padding:6px 12px;
+  font-family:'Nunito',sans-serif; font-size:12px;
+  font-weight:700; color:#fff; cursor:pointer;
+  transition:all 0.2s;
+}
+.tooltipThreadReply:hover {
+  background:#ff8ed5; transform:scale(1.05);
+}
+
+.tooltipReplyBox {
+  display:flex; gap:8px; align-items:center;
+  margin-top:16px; padding-top:16px;
+  border-top:2px dashed rgba(26,26,46,0.1);
+}
+.tooltipReplyInput {
+  flex:1; background:#fff; border:2px solid #1a1a2e;
+  border-radius:999px; padding:10px 16px;
+  font-family:'Nunito',sans-serif; font-size:14px;
+  color:#1a1a2e; outline:none; transition:all 0.2s;
+}
+.tooltipReplyInput:focus {
+  border-color:#FF6EC7; box-shadow:0 0 0 3px rgba(255,110,199,0.2);
+}
+.tooltipReplyInput::placeholder {
+  color:#999;
+}
+.tooltipReplyBtn {
+  width:40px; height:40px; border-radius:50%;
+  background:#FF6EC7; border:2px solid #1a1a2e;
+  color:#fff; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; flex-shrink:0;
+}
+.tooltipReplyBtn:hover {
+  background:#ff8ed5; transform:scale(1.1);
+}
+
+.notificationBadge {
+  position:absolute; top:-4px; right:-4px;
+  width:22px; height:22px; border-radius:50%;
+  background:#AAFF00; border:2px solid #1a1a2e;
+  font-size:11px; font-weight:800; color:#1a1a2e;
+  display:flex; align-items:center; justify-content:center;
+  animation:bounce 0.5s ease infinite alternate;
+}
+
+@keyframes bounce {
+  0% { transform:translateY(0); }
+  100% { transform:translateY(-4px); }
+}
+
+.tooltipLetterIcon {
+  position:absolute; top:16px; right:50px;
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg, #FF6EC7, #ff8ed5);
+  border:3px solid #1a1a2e;
+  font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+  box-shadow:3px 3px 0 #1a1a2e;
+}
+.tooltipLetterIcon:hover {
+  transform:translate(-2px, -2px) scale(1.05);
+  box-shadow:4px 4px 0 #1a1a2e;
+}
+.tooltipLetterBadge {
+  position:absolute; top:-8px; right:-8px;
+  width:24px; height:24px; border-radius:50%;
+  background:#AAFF00; border:2px solid #1a1a2e;
+  font-size:12px; font-weight:800; color:#1a1a2e;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.tooltipActions {
+  display:flex; gap:12px; margin-top:24px;
+  padding-top:20px; border-top:2px dashed rgba(26,26,46,0.2);
+}
+.tooltipActionBtn {
+  flex:1; padding:12px 20px; border-radius:12px;
+  border:3px solid #1a1a2e; background:#FF6EC7;
+  font-family:'Nunito',sans-serif; font-size:14px;
+  font-weight:700; color:#fff; cursor:pointer;
+  transition:all 0.2s; box-shadow:3px 3px 0 #1a1a2e;
+}
+.tooltipActionBtn:hover {
+  transform:translate(-2px, -2px);
+  box-shadow:4px 4px 0 #1a1a2e;
+}

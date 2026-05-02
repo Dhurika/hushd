@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
+import { supabase, ensureAuth } from '../supabase'
+import { trackPresence } from '../utils/presence'
 import L from 'leaflet'
 import { MOOD_FILTERS, MOOD_COLORS } from '../data/moods'
 import LocationGate from '../components/LocationGate'
@@ -70,13 +72,14 @@ export default function MapScreen() {
   })
   const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState(null)
-  const [sheetTab, setSheetTab] = useState('vibes')
   const [replyText, setReplyText] = useState('')
-  const [drops, setDrops] = useState(() => JSON.parse(localStorage.getItem('hushd_drops') || '[]'))
+  const [drops, setDrops] = useState([])
+  const [onlineCount, setOnlineCount] = useState(0)
+  const [currentUserId, setCurrentUserId] = useState(null)
+  const [unreadCount, setUnreadCount] = useState(0)
   const [threads, setThreads] = useState({})
   const [search, setSearch] = useState('')
   const [suggestions, setSuggestions] = useState([])
-  const [reactionsOpen, setReactionsOpen] = useState(false)
   const [pickedMood, setPickedMood] = useState(null)
   const [caption, setCaption] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
@@ -87,11 +90,114 @@ export default function MapScreen() {
   const filterRef = useRef(null)
   const mapRef = useRef(null)
 
+  // Track online users
   useEffect(() => {
-    const reload = () => setDrops(JSON.parse(localStorage.getItem('hushd_drops') || '[]'))
-    reload()
-    window.addEventListener('focus', reload)
-    return () => window.removeEventListener('focus', reload)
+    console.log('👥 Setting up presence tracking...')
+    ensureAuth().then((user) => {
+      console.log('✅ User ready for presence:', user.id)
+      setCurrentUserId(user.id)
+      
+      // Set initial count to 1 (current user)
+      setOnlineCount(1)
+      
+      const unsubscribe = trackPresence(user.id, (count) => {
+        console.log('👥 Online users updated:', count)
+        setOnlineCount(count > 0 ? count : 1)
+      })
+      return unsubscribe
+    }).catch(err => {
+      console.error('❌ Presence setup error:', err)
+      setOnlineCount(1) // Fallback to 1
+    })
+  }, [])
+
+  // Real-time Supabase listener
+  useEffect(() => {
+    console.log('🔄 Setting up Supabase listener...')
+    ensureAuth().then(async () => {
+      console.log('✅ Auth ready, fetching moods...')
+      
+      // Clean up expired moods
+      const { error: deleteError } = await supabase
+        .from('moods')
+        .delete()
+        .lt('expires_at', new Date().toISOString())
+      
+      if (deleteError) {
+        console.warn('⚠️ Cleanup error (non-critical):', deleteError)
+      }
+      
+      // Fetch active moods
+      const fetchMoods = async () => {
+        console.log('📥 Fetching moods from Supabase...')
+        const { data, error } = await supabase
+          .from('moods')
+          .select('*')
+          .gt('expires_at', new Date().toISOString())
+          .order('created_at', { ascending: false })
+        
+        if (error) {
+          console.error('❌ Supabase fetch error:', error)
+          return
+        }
+        
+        console.log('✅ Fetched moods:', data.length, 'moods')
+        
+        const moods = data.map(mood => {
+          const createdAt = new Date(mood.created_at)
+          const now = new Date()
+          const diffMs = now - createdAt
+          const diffMins = Math.floor(diffMs / 60000)
+          
+          let timeStr = 'just now'
+          if (diffMins < 1) timeStr = 'just now'
+          else if (diffMins < 60) timeStr = `${diffMins}m ago`
+          else if (diffMins < 1440) timeStr = `${Math.floor(diffMins / 60)}h ago`
+          else timeStr = `${Math.floor(diffMins / 1440)}d ago`
+          
+          return {
+            id: mood.id,
+            user_id: mood.user_id,
+            lat: mood.lat,
+            lng: mood.lng,
+            city: mood.city,
+            emoji: mood.emoji,
+            mood: mood.mood,
+            caption: mood.caption,
+            relates: mood.relates,
+            letters: mood.letters,
+            time: timeStr
+          }
+        })
+        
+        console.log('🗺️ Setting moods on map:', moods)
+        setDrops(moods)
+      }
+      
+      fetchMoods()
+      
+      // Real-time subscription
+      console.log('🔔 Setting up real-time subscription...')
+      const channel = supabase
+        .channel('moods-changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'moods' },
+          (payload) => {
+            console.log('🔔 Real-time update received:', payload)
+            fetchMoods()
+          }
+        )
+        .subscribe((status) => {
+          console.log('📡 Subscription status:', status)
+        })
+      
+      return () => {
+        console.log('🔌 Cleaning up subscription...')
+        supabase.removeChannel(channel)
+      }
+    }).catch(err => {
+      console.error('❌ Setup error:', err)
+    })
   }, [])
 
   useEffect(() => {
@@ -111,7 +217,7 @@ export default function MapScreen() {
     setLocation(loc)
   }
 
-  const handleDrop = () => {
+  const handleDrop = async () => {
     if (!pickedMood) return
     
     // Calculate rocket animation path
@@ -120,7 +226,6 @@ export default function MapScreen() {
     const mapRect = mapContainer?.getBoundingClientRect()
     
     if (btnRect && mapRect) {
-      // Calculate approximate position on map for user location
       const targetX = mapRect.left + (mapRect.width * 0.4)
       const targetY = mapRect.top + (mapRect.height * 0.5)
       
@@ -129,25 +234,49 @@ export default function MapScreen() {
         end: { x: targetX, y: targetY }
       })
       setShowRocket(true)
-      
       setTimeout(() => setShowRocket(false), 1500)
     }
     
-    const existing = JSON.parse(localStorage.getItem('hushd_drops') || '[]')
-    const newDrop = {
-      id: Date.now().toString(),
-      lat: location.lat, lng: location.lng,
-      city: location.city,
-      emoji: pickedMood.emoji, mood: pickedMood.mood,
-      caption: caption.trim() || `feeling ${pickedMood.mood}`,
-      time: 'just now', relates: 0, letters: 0,
+    try {
+      console.log('🔄 Starting mood drop from map...')
+      const user = await ensureAuth()
+      console.log('✅ User authenticated:', user.id)
+      
+      const expiresAt = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString()
+      
+      const moodData = {
+        user_id: user.id,
+        lat: location.lat,
+        lng: location.lng,
+        city: location.city,
+        emoji: pickedMood.emoji,
+        mood: pickedMood.mood,
+        caption: caption.trim() || `feeling ${pickedMood.mood}`,
+        expires_at: expiresAt,
+        relates: 0,
+        letters: 0,
+      }
+      
+      console.log('📤 Sending mood data:', moodData)
+      
+      const { data, error } = await supabase
+        .from('moods')
+        .insert(moodData)
+        .select()
+      
+      if (error) {
+        console.error('❌ Supabase error:', error)
+        throw error
+      }
+      
+      console.log('✅ Mood dropped successfully!', data)
+      setPickedMood(null)
+      setCaption('')
+      setPageFlipped(false)
+    } catch (error) {
+      console.error('❌ Error dropping mood:', error)
+      alert(`Failed to drop mood:\n\n${error.message}\n\nCheck console for details.`)
     }
-    localStorage.setItem('hushd_drops', JSON.stringify([newDrop, ...existing]))
-    setDrops([newDrop, ...existing])
-    
-    setPickedMood(null)
-    setCaption('')
-    setPageFlipped(false)
   }
 
   if (!location) return <LocationGate onLocation={handleLocation} />
@@ -156,7 +285,7 @@ export default function MapScreen() {
   const thread = selected ? (threads[selected.id] || []) : []
 
   const handleMarkerClick = useCallback((dot) => {
-    setSelected(dot); setSheetTab('vibes'); setReplyText('')
+    setSelected(dot); setReplyText('')
   }, [])
 
   const handleSendReply = () => {
@@ -327,6 +456,12 @@ export default function MapScreen() {
         )}
       </div>
 
+      {/* LIVE USER COUNT */}
+      <div className={styles.liveCount}>
+        <span className={styles.liveCountDot}></span>
+        <span className={styles.liveCountText}>{onlineCount} online</span>
+      </div>
+
       {/* FILTER DROPDOWN */}
       <div className={styles.filterDropdown} ref={filterRef}>
         <button className={styles.filterBtn} onClick={() => setFilterOpen(!filterOpen)}>
@@ -350,8 +485,11 @@ export default function MapScreen() {
 
       {/* RIGHT SIDE ICONS */}
       <div className={styles.rightIcons}>
-        <button className={styles.iconBtn} onClick={() => navigate('/letters')}>
+        <button className={styles.iconBtn} onClick={() => { navigate('/letters'); setUnreadCount(0); }}>
           💌
+          {unreadCount > 0 && (
+            <span className={styles.notificationBadge}>{unreadCount}</span>
+          )}
         </button>
         <button className={styles.iconBtn}>
           📝
@@ -381,68 +519,46 @@ export default function MapScreen() {
 
 <div className={styles.exploreBadge}>EXPLORE.<br />CONNECT.<br />EXPRESS.</div>
 
-      {/* SHEET */}
+      {/* TOOLTIP */}
       {selected && (
         <>
           <div className={styles.overlay} onClick={() => setSelected(null)} />
-          <div className={styles.sheet}>
-            <div className={styles.sheetHandle} />
-            <div className={styles.sheetHeader}>
-              <span className={styles.sheetEmoji}>{selected.emoji}</span>
-              <div className={styles.sheetMeta}>
-                <div className={styles.sheetCity}>📍 {selected.city}</div>
-                <div className={styles.sheetCaption}>{selected.caption}</div>
-                <div className={styles.sheetTime}>{selected.time}</div>
-                <span className={styles.moodTag} style={{ background: MOOD_COLORS[selected.mood] }}>{selected.mood}</span>
-              </div>
-              <button className={styles.sheetClose} onClick={() => setSelected(null)}>✕</button>
-            </div>
-            <div className={styles.sheetTabs}>
-              {[{ key: 'vibes', label: '🤝 Vibes' }, { key: 'thread', label: `💬 Thread${thread.length > 0 ? ` (${thread.length})` : ''}` }, { key: 'letter', label: '💌 Letter' }]
-                .map(t => <button key={t.key} className={`${styles.sheetTab} ${sheetTab === t.key ? styles.sheetTabActive : ''}`} onClick={() => setSheetTab(t.key)}>{t.label}</button>)}
-            </div>
-            {sheetTab === 'vibes' && (
-              <div className={styles.sheetBody}>
-                <button className={styles.reactionsToggle} onClick={() => setReactionsOpen(o => !o)}>🤝 React {reactionsOpen ? '▲' : '▼'}</button>
-                {reactionsOpen && (
-                  <div className={styles.reactions}>
-                    {['💙 felt this', '🤝 same here', '🌸 sending love', '🫂 hugs', '🔥 same energy', '✨ thinking of you'].map(r => (
-                      <button key={r} className={styles.reactionChip} onClick={() => setReactionsOpen(false)}>{r}</button>
-                    ))}
-                  </div>
+          <div className={styles.ownMoodTooltip}>
+            <button className={styles.tooltipClose} onClick={() => setSelected(null)}>✕</button>
+            <div className={styles.tooltipEmoji}>{selected.emoji}</div>
+            <div className={styles.tooltipMessage}>"{selected.caption}"</div>
+            
+            {selected.user_id === currentUserId && (
+              <button className={styles.tooltipLetterIcon} onClick={() => navigate('/letters')}>
+                💌
+                {unreadCount > 0 && (
+                  <span className={styles.tooltipLetterBadge}>{unreadCount}</span>
                 )}
-                <div className={styles.stats}>
-                  <span>🤝 {selected.relates} relates</span>
-                  <span>💌 {selected.letters} letters</span>
-                  <span>💬 {thread.length} replies</span>
-                </div>
-                <button className={styles.primaryBtn} onClick={() => navigate('/write', { state: { dot: selected } })}>💌 Send anonymous letter</button>
-              </div>
+              </button>
             )}
-            {sheetTab === 'thread' && (
-              <div className={styles.sheetBody}>
-                <div className={styles.threadList}>
-                  {thread.length === 0
-                    ? <div className={styles.emptyThread}><div style={{ fontSize: 32, marginBottom: 8 }}>💬</div><div>No replies yet. Be the first.</div></div>
-                    : thread.map(msg => (
-                      <div key={msg.id} className={styles.threadMsg}>
-                        <span className={styles.threadEmoji}>{msg.emoji}</span>
-                        <div><div className={styles.threadText}>{msg.text}</div><div className={styles.threadTime}>{msg.time} · anonymous</div></div>
-                      </div>
-                    ))}
-                </div>
-                <div className={styles.replyBox}>
-                  <input className={styles.replyInput} placeholder="reply anonymously..."
-                    value={replyText} onChange={e => setReplyText(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendReply()} />
-                  <button className={styles.replySubmit} onClick={handleSendReply}>↑</button>
+            
+            {thread.length > 0 && (
+              <div className={styles.tooltipThreads}>
+                <div className={styles.tooltipThreadTitle}>💬 {thread.length} {thread.length === 1 ? 'reply' : 'replies'}</div>
+                <div className={styles.tooltipThreadList}>
+                  {thread.map(msg => (
+                    <div key={msg.id} className={styles.tooltipThreadItem}>
+                      <div className={styles.tooltipThreadText}>{msg.text}</div>
+                      <div className={styles.tooltipThreadTime}>{msg.time}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
-            {sheetTab === 'letter' && (
-              <div className={styles.sheetBody}>
-                <p className={styles.letterPrompt}>Send a private anonymous letter. Only they'll see it.</p>
-                <button className={styles.primaryBtn} onClick={() => navigate('/write', { state: { dot: selected } })}>💌 Write them a letter</button>
+            
+            {selected.user_id !== currentUserId && (
+              <div className={styles.tooltipActions}>
+                <button className={styles.tooltipActionBtn} onClick={handleSendReply}>
+                  💬 Reply
+                </button>
+                <button className={styles.tooltipActionBtn} onClick={() => navigate('/write', { state: { dot: selected } })}>
+                  💌 Letter
+                </button>
               </div>
             )}
           </div>

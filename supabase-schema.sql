@@ -44,3 +44,33 @@ $$ LANGUAGE plpgsql;
 --   '0 * * * *',
 --   'SELECT delete_expired_moods();'
 -- );
+
+
+-- Create replies table
+CREATE TABLE replies (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  mood_id BIGINT REFERENCES moods(id) ON DELETE CASCADE,
+  user_id UUID,
+  text TEXT NOT NULL
+);
+
+-- Create letters table
+CREATE TABLE letters (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  mood_id BIGINT REFERENCES moods(id) ON DELETE CASCADE,
+  from_user_id UUID,
+  to_user_id UUID,
+  subject TEXT,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT FALSE
+);
+
+-- Enable Realtime for replies
+ALTER PUBLICATION supabase_realtime ADD TABLE replies;
+
+-- Create indexes
+CREATE INDEX idx_replies_mood_id ON replies(mood_id);
+CREATE INDEX idx_letters_to_user ON letters(to_user_id);
+CREATE INDEX idx_letters_mood_id ON letters(mood_id);

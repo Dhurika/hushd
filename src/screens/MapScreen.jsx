@@ -155,11 +155,15 @@ export default function MapScreen() {
           else if (diffMins < 1440) timeStr = `${Math.floor(diffMins / 60)}h ago`
           else timeStr = `${Math.floor(diffMins / 1440)}d ago`
           
+          // Add small random offset to prevent exact overlap (0.005 degrees ≈ 500m)
+          const offsetLat = (Math.random() - 0.5) * 0.005
+          const offsetLng = (Math.random() - 0.5) * 0.005
+          
           return {
             id: mood.id,
             user_id: mood.user_id,
-            lat: mood.lat,
-            lng: mood.lng,
+            lat: mood.lat + offsetLat,
+            lng: mood.lng + offsetLng,
             city: mood.city,
             emoji: mood.emoji,
             mood: mood.mood,
@@ -284,15 +288,69 @@ export default function MapScreen() {
   const filtered = drops.filter(m => filter === 'all' || m.mood === filter)
   const thread = selected ? (threads[selected.id] || []) : []
 
-  const handleMarkerClick = useCallback((dot) => {
-    setSelected(dot); setReplyText('')
+  const handleMarkerClick = useCallback(async (dot) => {
+    setSelected(dot)
+    setReplyText('')
+    
+    // Fetch replies for this mood
+    try {
+      const { data, error } = await supabase
+        .from('replies')
+        .select('*')
+        .eq('mood_id', dot.id)
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      
+      const replies = data.map(reply => {
+        const createdAt = new Date(reply.created_at)
+        const now = new Date()
+        const diffMins = Math.floor((now - createdAt) / 60000)
+        
+        let timeStr = 'just now'
+        if (diffMins < 1) timeStr = 'just now'
+        else if (diffMins < 60) timeStr = `${diffMins}m ago`
+        else if (diffMins < 1440) timeStr = `${Math.floor(diffMins / 60)}h ago`
+        else timeStr = `${Math.floor(diffMins / 1440)}d ago`
+        
+        return {
+          id: reply.id,
+          text: reply.text,
+          time: timeStr,
+          emoji: '💬'
+        }
+      })
+      
+      setThreads(prev => ({ ...prev, [dot.id]: replies }))
+    } catch (error) {
+      console.error('Fetch replies error:', error)
+    }
   }, [])
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!replyText.trim() || !selected) return
-    const msg = { id: Date.now().toString(), text: replyText, time: 'just now', emoji: '💬' }
-    setThreads(prev => ({ ...prev, [selected.id]: [msg, ...(prev[selected.id] || [])] }))
-    setReplyText('')
+    
+    try {
+      const user = await ensureAuth()
+      
+      const { error } = await supabase
+        .from('replies')
+        .insert({
+          mood_id: selected.id,
+          user_id: user.id,
+          text: replyText.trim()
+        })
+      
+      if (error) throw error
+      
+      // Add to local state for instant feedback
+      const msg = { id: Date.now().toString(), text: replyText, time: 'just now', emoji: '💬' }
+      setThreads(prev => ({ ...prev, [selected.id]: [msg, ...(prev[selected.id] || [])] }))
+      setReplyText('')
+    } catch (error) {
+      console.error('Reply error:', error)
+      alert('Failed to send reply')
+    }
   }
 
   return (
@@ -553,6 +611,13 @@ export default function MapScreen() {
             
             {selected.user_id !== currentUserId && (
               <div className={styles.tooltipActions}>
+                <input
+                  className={styles.tooltipReplyInput}
+                  placeholder="Reply anonymously..."
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
+                />
                 <button className={styles.tooltipActionBtn} onClick={handleSendReply}>
                   💬 Reply
                 </button>

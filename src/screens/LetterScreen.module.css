@@ -26,6 +26,28 @@
 .aiStarter:hover { background:rgba(0,229,255,0.1); }
 .aiLabel { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--cyan); margin-bottom:6px; }
 .aiText { font-size:13px; color:rgba(240,240,255,0.8); line-height:1.5; }
+.subjectInput {
+  width: 100%;
+  padding: 14px 18px;
+  border: 3px solid #1a1a2e;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+  margin-bottom: 16px;
+  box-shadow: 3px 3px 0 #1a1a2e;
+}
+
+.subjectInput:focus {
+  border-color: #FF6EC7;
+  box-shadow: 3px 3px 0 #FF6EC7;
+}
+
+.subjectInput::placeholder {
+  color: #999;
+}
+
 .letterInput {
   width:100%; background:rgba(255,255,255,0.06);
   border:1px solid var(--border); border-radius:16px;

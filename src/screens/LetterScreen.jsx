@@ -1,13 +1,50 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { supabase, ensureAuth } from '../supabase'
 import styles from './LetterScreen.module.css'
 
 export default function LetterScreen() {
   const navigate = useNavigate()
   const { state } = useLocation()
   const dot = state?.dot
+  const [subject, setSubject] = useState('')
   const [letter, setLetter] = useState('')
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  const handleSend = async () => {
+    if (!letter.trim() || !dot) return
+    
+    setSending(true)
+    try {
+      const user = await ensureAuth()
+      
+      const { error } = await supabase
+        .from('letters')
+        .insert({
+          mood_id: dot.id,
+          from_user_id: user.id,
+          to_user_id: dot.user_id,
+          subject: subject.trim() || 'Anonymous letter',
+          message: letter.trim()
+        })
+      
+      if (error) throw error
+      
+      // Update letter count on mood
+      await supabase
+        .from('moods')
+        .update({ letters: (dot.letters || 0) + 1 })
+        .eq('id', dot.id)
+      
+      setSent(true)
+    } catch (error) {
+      console.error('Send letter error:', error)
+      alert('Failed to send letter')
+    } finally {
+      setSending(false)
+    }
+  }
 
   if (sent) return (
     <div className={styles.sentContainer}>
@@ -39,6 +76,14 @@ export default function LetterScreen() {
           </div>
         )}
 
+        <input
+          className={styles.subjectInput}
+          placeholder="Subject (optional)"
+          value={subject}
+          onChange={e => setSubject(e.target.value)}
+          maxLength={50}
+        />
+
         <textarea
           className={styles.letterInput}
           placeholder="Write something honest. They'll never know who you are."
@@ -53,10 +98,10 @@ export default function LetterScreen() {
 
         <button
           className={styles.sendBtn}
-          disabled={!letter.trim()}
-          onClick={() => setSent(true)}
+          disabled={!letter.trim() || sending}
+          onClick={handleSend}
         >
-          Send anonymously 🤫
+          {sending ? 'Sending...' : 'Send anonymously 🤫'}
         </button>
       </div>
     </div>
